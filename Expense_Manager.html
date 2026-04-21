@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Manager</title>
+
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #333;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px;
+    color: white;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+
+  h2 {
+    margin-top: 0;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #5a67d8;
+  }
+
+  .summary {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+
+  .box {
+    flex: 1;
+    margin: 5px;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+  }
+
+  .income { background: #48bb78; }
+  .expense { background: #f56565; }
+  .balance { background: #4299e1; }
+
+  .transaction {
+    background: #f9f9f9;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .transaction span {
+    display: block;
+  }
+
+  .delete-btn {
+    background: red;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>💰 Expense Manager</h1>
+</header>
+
+<div class="container">
+
+  <h2>Add Transaction</h2>
+  <input type="text" id="desc" placeholder="Description">
+  <input type="number" id="amount" placeholder="Amount">
+  <select id="type">
+    <option value="">Select Type</option>
+    <option value="income">Income</option>
+    <option value="expense">Expense</option>
+  </select>
+  <button onclick="addTransaction()">Add</button>
+
+  <div class="summary">
+    <div class="box income">
+      <h3>Income</h3>
+      <p id="income">0</p>
+    </div>
+    <div class="box expense">
+      <h3>Expense</h3>
+      <p id="expense">0</p>
+    </div>
+    <div class="box balance">
+      <h3>Balance</h3>
+      <p id="balance">0</p>
+    </div>
+  </div>
+
+  <h2>Transactions</h2>
+  <div id="list"></div>
+
+</div>
+
+<script>
+let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+function updateUI() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+
+  let income = 0, expense = 0;
+
+  transactions.forEach((t, index) => {
+    if (t.type === 'income') income += t.amount;
+    else expense += t.amount;
+
+    list.innerHTML += `
+      <div class="transaction">
+        <div>
+          <span><strong>${t.desc}</strong></span>
+          <span>₹${t.amount} (${t.type})</span>
+        </div>
+        <div class="delete-btn" onclick="deleteTransaction(${index})">X</div>
+      </div>
+    `;
+  });
+
+  document.getElementById('income').innerText = income;
+  document.getElementById('expense').innerText = expense;
+  document.getElementById('balance').innerText = income - expense;
+}
+
+function addTransaction() {
+  const desc = document.getElementById('desc').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const type = document.getElementById('type').value;
+
+  if (!desc || !amount || !type) {
+    alert('Fill all fields');
+    return;
+  }
+
+  transactions.push({ desc, amount, type });
+  localStorage.setItem('transactions', JSON.stringify(transactions));
+
+  document.getElementById('desc').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('type').value = '';
+
+  updateUI();
+}
+
+function deleteTransaction(index) {
+  transactions.splice(index, 1);
+  localStorage.setItem('transactions', JSON.stringify(transactions));
+  updateUI();
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
